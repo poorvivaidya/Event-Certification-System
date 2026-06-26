@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Student Sign Up{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5" style="max-width:650px;">
+
+    <div class="card shadow p-4">
+
+        <h2 class="text-center mb-4">
+            Student Registration
+        </h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label>Student ID</label>
+                <input
+                    type="text"
+                    name="student_id"
+                    class="form-control"
+                    required>
+            </div>
+
+            <div class="mb-3">
+                <label>Username</label>
+                <input
+                    type="text"
+                    name="username"
+                    class="form-control"
+                    required>
+            </div>
+
+            <div class="mb-3">
+                <label>First Name</label>
+                <input
+                    type="text"
+                    name="first_name"
+                    class="form-control"
+                    required>
+            </div>
+
+            <div class="mb-3">
+                <label>Last Name</label>
+                <input
+                    type="text"
+                    name="last_name"
+                    class="form-control"
+                    required>
+            </div>
+
+            <div class="mb-3">
+                <label>Email</label>
+                <input
+                    type="email"
+                    name="email"
+                    class="form-control"
+                    required>
+            </div>
+
+            <div class="mb-3">
+                <label>Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    required>
+            </div>
+
+            <div class="mb-4">
+                <label>Confirm Password</label>
+                <input
+                    type="password"
+                    name="confirm_password"
+                    class="form-control"
+                    required>
+            </div>
+
+            <button
+                class="btn btn-primary w-100">
+
+                Create Account
+
+            </button>
+
+        </form>
+
+        <hr>
+
+        <p class="text-center">
+
+            Already have an account?
+
+            <a href="{% url 'login' %}">
+
+                Login Here
+
+            </a>
+
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

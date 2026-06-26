@@ -26,44 +26,6 @@
     <form method="post" enctype="multipart/form-data" novalidate id="registration-form">
       {% csrf_token %}
 
-      <!-- Student ID & Name -->
-      <div class="row g-3 mb-3">
-        <div class="col-sm-6">
-          <label for="{{ form.student_id.id_for_label }}" class="form-label fw-semibold">
-            Student ID <span class="text-danger">*</span>
-          </label>
-          {{ form.student_id }}
-          {% if form.student_id.errors %}
-          <div class="invalid-feedback d-block">
-            {% for error in form.student_id.errors %}{{ error }}{% endfor %}
-          </div>
-          {% endif %}
-        </div>
-        <div class="col-sm-6">
-          <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold">
-            Full Name <span class="text-danger">*</span>
-          </label>
-          {{ form.name }}
-          {% if form.name.errors %}
-          <div class="invalid-feedback d-block">
-            {% for error in form.name.errors %}{{ error }}{% endfor %}
-          </div>
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- Email -->
-      <div class="mb-3">
-        <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">
-          Email Address <span class="text-danger">*</span>
-        </label>
-        {{ form.email }}
-        {% if form.email.errors %}
-        <div class="invalid-feedback d-block">
-          {% for error in form.email.errors %}{{ error }}{% endfor %}
-        </div>
-        {% endif %}
-      </div>
 
       <!-- Event -->
       <div class="mb-3">

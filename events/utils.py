@@ -12,7 +12,7 @@ def send_registration_email(participant):
     subject = "Event Registration Successful"
 
     message = f"""
-Hello {participant.name},
+Hello {participant.student.user.get_full_name()},
 
 You have successfully registered for:
 
@@ -30,7 +30,7 @@ Thank you for participating!
         subject,
         message,
         settings.DEFAULT_FROM_EMAIL,
-        [participant.email],
+        [participant.student.user.email],
         fail_silently=True
     )
 
@@ -114,7 +114,7 @@ def generate_certificate(participant):
     y -= 45
 
     # Name
-    draw_center(participant.name, 28, True, colors.darkblue)
+    draw_center(participant.student.user.get_full_name(), 28, True, colors.darkblue)
     y -= 40
 
     # Text
@@ -146,7 +146,7 @@ def generate_certificate(participant):
     c.setFont("Helvetica", 11)
     c.setFillColor(colors.black)
 
-    c.drawString(120, details_y, f"Student ID: {participant.student_id}")
+    c.drawString(120, details_y, f"Student ID: {participant.student.student_id}")
     c.drawString(120, details_y - 25, "Mode: Offline")
     c.drawString(120, details_y - 50, "Status: Verified")
 
@@ -195,7 +195,7 @@ def generate_certificate(participant):
     c.drawCentredString(
     width / 2,
     footer_y,
-    f"Student ID: {participant.student_id}"
+    f"Student ID: {participant.student.student_id}"
 )
 
 # RIGHT (IMPORTANT: SHORTEN URL)

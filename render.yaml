@@ -3,12 +3,17 @@ services:
     name: django-semihack
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
-    startCommand: gunicorn project_name.wsgi
+
+    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput
+
+    startCommand: gunicorn event_cert.wsgi:application
+
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+
       - key: SECRET_KEY
         generateValue: true
+
       - key: DEBUG
-        value: False
+        value: "False"

@@ -6,16 +6,117 @@ from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from .forms import ParticipantRegistrationForm
 from .models import Event, Participant, Feedback
-from .forms import ParticipantForm, FeedbackForm, BulkUploadForm
+from .forms import ParticipantRegistrationForm, FeedbackForm, BulkUploadForm
 from .utils import (
     generate_certificate,
     send_registration_email,
     process_bulk_csv,
 )
 
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+from .models import StudentProfile
 
+def signup(request):
+
+    if request.method == "POST":
+
+        username = request.POST.get("username")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        student_id = request.POST.get("student_id")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password")
+
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return redirect("signup")
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username already exists.")
+            return redirect("signup")
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email already exists.")
+            return redirect("signup")
+
+        if StudentProfile.objects.filter(student_id=student_id).exists():
+            messages.error(request, "Student ID already exists.")
+            return redirect("signup")
+
+        user = User.objects.create_user(
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password
+        )
+
+        StudentProfile.objects.create(
+            user=user,
+            student_id=student_id
+        )
+
+        messages.success(
+            request,
+            "Account created successfully. Please login."
+        )
+
+        return redirect("login")
+
+    return render(request, "events/signup.html")
+
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.shortcuts import render, redirect
+
+
+def user_login(request):
+
+    if request.method == "POST":
+
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(
+            request,
+            username=username,
+            password=password
+        )
+
+        if user is not None:
+
+            login(request, user)
+
+            # Admin Login
+            if user.is_staff:
+                return redirect("admin_dashboard")
+
+            # Student Login
+            return redirect("student_dashboard")
+
+        messages.error(
+            request,
+            "Invalid username or password."
+        )
+
+    return render(
+        request,
+        "events/login.html"
+    )
+
+
+def user_logout(request):
+
+    logout(request)
+
+    return redirect("index")
 # ─────────────────────────────────────────────────────────────────────────────
 # HOME / INDEX
 # ─────────────────────────────────────────────────────────────────────────────
@@ -29,30 +130,23 @@ def index(request):
         'total_participants': total_participants,
     })
 
+@login_required
+def student_dashboard(request):
 
-# ─────────────────────────────────────────────────────────────────────────────
-# EVENT REGISTRATION
-# ─────────────────────────────────────────────────────────────────────────────
+    participant = Participant.objects.filter(
+        student__user=request.user
+    ).first()
 
-def register(request):
-    """Handle participant registration with full validation."""
-    form = ParticipantForm(request.POST or None, request.FILES or None)
+    context = {
+        "participant": participant
+    }
 
-    if request.method == 'POST':
-        if form.is_valid():
-            participant = form.save()
-            # Send confirmation email (printed to console)
-            send_registration_email(participant)
-            messages.success(
-                request,
-                f"🎉 Registration successful! Welcome, {participant.name}. "
-                f"A confirmation has been sent to {participant.email}."
-            )
-            return redirect('register')
-        else:
-            messages.error(request, "Please fix the errors below and resubmit.")
+    return render(
+        request,
+        "events/student_dashboard.html",
+        context
+    )
 
-    return render(request, 'events/register.html', {'form': form})
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Participant
@@ -69,35 +163,132 @@ def toggle_transaction(request, pk):
         "transaction_verified": participant.transaction_verified
     })
 
+from django.contrib.auth.decorators import login_required
+from .forms import ParticipantRegistrationForm
+from .models import Participant
+from .utils import send_registration_email
+
+@login_required
+def register_event(request):
+
+    form = ParticipantRegistrationForm(
+        request.POST or None,
+        request.FILES or None
+    )
+
+    if request.method == "POST":
+
+        if form.is_valid():
+
+            participant = form.save(commit=False)
+
+            # Attach logged-in student
+            participant.student = request.user.studentprofile
+
+            participant.save()
+
+            send_registration_email(participant)
+
+            messages.success(
+                request,
+                "Event registration submitted successfully. Please wait for admin approval."
+            )
+
+            return redirect("student_dashboard")
+
+    return render(
+        request,
+        "events/register_event.html",
+        {
+            "form": form
+        }
+    )
+
 # ─────────────────────────────────────────────────────────────────────────────
 # ADMIN DASHBOARD
 # ─────────────────────────────────────────────────────────────────────────────
 
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import User
+from .models import Event, Participant, StudentProfile
+
+@staff_member_required
 def admin_dashboard(request):
-    """Admin view: list all participants with attendance toggle and stats."""
-    event_id = request.GET.get('event')
+
+    event_id = request.GET.get("event")
+
     events = Event.objects.all()
 
-    participants = Participant.objects.select_related('event').all()
+    students = StudentProfile.objects.select_related("user").all()
+
+    participants = Participant.objects.select_related(
+        "student",
+        "student__user",
+        "event"
+    )
+
     if event_id:
         participants = participants.filter(event_id=event_id)
 
-    # Stats
-    total = participants.count()
-    attended = participants.filter(attendance=True).count()
-    certified = sum(1 for p in participants if p.can_get_certificate)
+    total_students = students.count()
+
+    total_events = events.count()
+
+    total_participants = participants.count()
+
+    pending_payments = participants.filter(
+        transaction_verified=False
+    ).count()
+
+    approved_payments = participants.filter(
+        transaction_verified=True
+    ).count()
+
+    attended = participants.filter(
+        attendance=True
+    ).count()
+
+    certificates = participants.filter(
+        attendance=True,
+        feedback_submitted=True,
+        transaction_verified=True
+    ).count()
 
     bulk_form = BulkUploadForm()
 
-    return render(request, 'events/admin_dashboard.html', {
-        'participants': participants,
-        'events': events,
-        'selected_event': event_id,
-        'total': total,
-        'attended': attended,
-        'certified': certified,
-        'bulk_form': bulk_form,
-    })
+    context = {
+
+        "students": students,
+
+        "participants": participants,
+
+        "events": events,
+
+        "selected_event": event_id,
+
+        "total_students": total_students,
+
+        "total_events": total_events,
+
+        "total_participants": total_participants,
+
+        "pending_payments": pending_payments,
+
+        "approved_payments": approved_payments,
+
+        "attended": attended,
+
+        "certificates": certificates,
+
+        "bulk_form": bulk_form,
+
+    }
+
+    return render(
+        request,
+        "events/admin_dashboard.html",
+        context
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -108,7 +299,10 @@ def admin_dashboard(request):
 def toggle_attendance(request, participant_id):
     """AJAX endpoint to toggle attendance. Returns JSON."""
     try:
-        participant = get_object_or_404(Participant, pk=participant_id)
+        participant = get_object_or_404(
+    Participant,
+    student=request.user.studentprofile
+)
         participant.attendance = not participant.attendance
         participant.save(update_fields=['attendance'])
 
@@ -117,9 +311,9 @@ def toggle_attendance(request, participant_id):
             'attendance': participant.attendance,
             'participant_id': participant_id,
             'message': (
-                f"Attendance marked for {participant.name}"
+                f"Attendance marked for {participant.student.user.get_full_name()}"
                 if participant.attendance
-                else f"Attendance removed for {participant.name}"
+                else f"Attendance removed for {participant.student.user.get_full_name()}"
             ),
         })
     except Exception as e:
@@ -130,10 +324,13 @@ def toggle_attendance(request, participant_id):
 # ─────────────────────────────────────────────────────────────────────────────
 # CERTIFICATE DOWNLOAD
 # ─────────────────────────────────────────────────────────────────────────────
-
+@login_required
 def download_certificate(request, participant_id):
   
-    participant = get_object_or_404(Participant, pk=participant_id)
+    participant = get_object_or_404(
+    Participant,
+    student=request.user.studentprofile
+)
 
     if not participant.can_get_certificate:
         missing = []
@@ -176,7 +373,7 @@ def download_certificate(request, participant_id):
 # ─────────────────────────────────────────────────────────────────────────────
 # CERTIFICATE VERIFICATION PAGE
 # ─────────────────────────────────────────────────────────────────────────────
-
+@login_required
 def verify_certificate(request, certificate_id):
     """Public verification page for a certificate."""
     try:
@@ -269,7 +466,7 @@ def participant_detail(request, participant_id):
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Participant
 from .forms import FeedbackForm
-
+@login_required
 def feedback(request, pk):
     participant = get_object_or_404(Participant, pk=pk)
 
@@ -283,10 +480,21 @@ def feedback(request, pk):
     if request.method == "POST":
         form = FeedbackForm(request.POST)
         if form.is_valid():
+
+            feedback = form.save(commit=False)
+            feedback.participant = participant
+            feedback.save()
+
             participant.feedback_submitted = True
             participant.save()
 
-            return redirect("certificate", pk=participant.pk)
+            messages.success(
+    request,
+    "Feedback submitted successfully."
+            )
+
+            return redirect("student_dashboard")
+            
 
     else:
         form = FeedbackForm()

@@ -167,22 +167,43 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}"
-               href="{% url 'register' %}">
-              <i class="bi bi-person-plus me-1"></i>Register
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}"
-               href="{% url 'admin_dashboard' %}">
-              <i class="bi bi-speedometer2 me-1"></i>Dashboard
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/admin/">
-              <i class="bi bi-gear me-1"></i>Admin
-            </a>
-          </li>
+    <a class="nav-link" href="{% url 'signup' %}">
+        <i class="bi bi-person-plus"></i>
+        Student Sign Up
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'login' %}">
+        <i class="bi bi-box-arrow-in-right"></i>
+        Student Login
+    </a>
+</li>
+
+{% if user.is_authenticated %}
+
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'student_dashboard' %}">
+        <i class="bi bi-speedometer2"></i>
+        Dashboard
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'logout' %}">
+        <i class="bi bi-box-arrow-right"></i>
+        Logout
+    </a>
+</li>
+
+{% endif %}
+
+<li class="nav-item">
+    <a class="nav-link" href="/admin/">
+        <i class="bi bi-shield-lock"></i>
+        Admin Login
+    </a>
+</li>
         </ul>
       </div>
     </div>
