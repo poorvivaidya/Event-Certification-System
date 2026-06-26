@@ -25,7 +25,6 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 INSTALLED_APPS = [
-    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -79,19 +78,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
-JAZZMIN_SETTINGS = {
-    "site_title": "Event Admin",
-    "site_header": "Event Certification",
-    "site_brand": "Event Admin",
-
-    "theme": "flatly",  # clean white + blue theme
-
-    "topmenu_links": [
-        {"name": "Home", "url": "/", "permissions": ["auth.view_user"]},
-    ],
-
-    "show_sidebar": True,
-}
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
