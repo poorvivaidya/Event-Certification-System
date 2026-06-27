@@ -247,6 +247,12 @@ The QR code redirects to the verification page where the certificate authenticit
 
 ---
 
+## 🌐 Live Application
+
+**Live Demo:** https://event-certification-system-1.onrender.com
+
+Experience the complete Event Lifecycle & Certification System, including student registration, event management, certificate generation, and QR-based certificate verification.
+
 ## 📌 Future Enhancements
 
 - Email certificate after event completion
