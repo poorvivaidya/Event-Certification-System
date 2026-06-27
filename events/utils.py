@@ -1,5 +1,3 @@
-from turtle import title, width
-
 from reportlab.lib.pagesizes import landscape, A4
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
