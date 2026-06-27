@@ -17,11 +17,11 @@ def validate_student_id(student_id):
     1AB23CD45
     """
 
-    pattern = r'^[0-9][A-Za-z]{2}[0-9]{2}[A-Za-z]{2}[0-9]{2}$'
+    pattern = r'^[0-9][A-Za-z]{2}[0-9]{2}[A-Za-z]{2}[0-9]{3}$'
 
     if not re.match(pattern, student_id):
         raise ValidationError(
-            "Student ID must follow the format: 1AB23CD45"
+            "Student ID must follow the format: 1AB23CD456"
         )
 
 

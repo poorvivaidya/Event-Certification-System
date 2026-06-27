@@ -16,10 +16,10 @@ from .validators import validate_receipt_file
 
 class StudentRegistrationForm(forms.ModelForm):
     student_id = forms.CharField(
-        max_length=20,
+        max_length=10,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': '1JB23CS001'
+            'placeholder': '1AB23CD456'
         })
     )
 

@@ -26,7 +26,7 @@ class StudentProfile(models.Model):
     )
 
     student_id = models.CharField(
-    max_length=9,
+    max_length=10,
     unique=True,
     validators=[validate_student_id]
 )
