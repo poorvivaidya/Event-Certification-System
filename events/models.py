@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from .validators import validate_receipt_file
-
+from .validators import validate_receipt_file, validate_student_id
 
 class Event(models.Model):
     name = models.CharField(max_length=200)
@@ -26,13 +26,21 @@ class StudentProfile(models.Model):
     )
 
     student_id = models.CharField(
-        max_length=20,
-        unique=True
-    )
+    max_length=9,
+    unique=True,
+    validators=[validate_student_id]
+)
 
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.student_id})"
+    
 
+CERTIFICATE_CHOICES = [
+    ("PARTICIPATION", "Participation"),
+    ("FIRST", "🥇 First Place"),
+    ("SECOND", "🥈 Second Place"),
+    ("THIRD", "🥉 Third Place"),
+]    
 
 class Participant(models.Model):
     student = models.ForeignKey(
@@ -66,9 +74,17 @@ class Participant(models.Model):
         default=False
     )
 
+    
     # Student Feedback
     feedback_submitted = models.BooleanField(
         default=False
+    )
+
+    # Certificate Type (Admin chooses)
+    certificate_type = models.CharField(
+        max_length=20,
+        choices=CERTIFICATE_CHOICES,
+        default="PARTICIPATION"
     )
 
     # Certificate Tracking
@@ -87,7 +103,14 @@ class Participant(models.Model):
     )
 
     class Meta:
-        ordering = ['-registered_at']
+        ordering = ["-registered_at"]
+
+    constraints = [
+        models.UniqueConstraint(
+            fields=["student", "event"],
+            name="unique_student_event"
+        )
+    ]
 
     def __str__(self):
         return (

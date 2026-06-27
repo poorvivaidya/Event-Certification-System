@@ -1,6 +1,6 @@
 import json
 import os
-from urllib import response
+from urllib import request, response
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.http import require_POST, require_GET
@@ -9,9 +9,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
+from events.validators import validate_student_id
 from .forms import ParticipantRegistrationForm
 from .models import Event, Participant, Feedback
 from .forms import ParticipantRegistrationForm, FeedbackForm, BulkUploadForm
+
 from .utils import (
     generate_certificate,
     send_registration_email,
@@ -33,6 +36,12 @@ def signup(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
+
+        try:
+            validate_student_id(student_id)
+        except ValidationError as e:
+            messages.error(request, e.message)
+            return redirect("signup")
 
         if password != confirm_password:
             messages.error(request, "Passwords do not match.")
@@ -93,6 +102,10 @@ def user_login(request):
         if user is not None:
 
             login(request, user)
+            if not request.POST.get("remember_me"):
+                request.session.set_expiry(0)
+            else:
+                request.session.set_expiry(60 * 60 * 24 * 30)   # 30 days
 
             # Admin Login
             if user.is_staff:
@@ -136,16 +149,23 @@ def student_dashboard(request):
     participant = Participant.objects.filter(
         student__user=request.user
     ).first()
+    participants = Participant.objects.filter(
+    student=request.user.studentprofile
+).select_related("event")
 
     context = {
-        "participant": participant
+        "participant": participant,
+        "participants": participants
     }
 
     return render(
-        request,
-        "events/student_dashboard.html",
-        context
-    )
+    request,
+    "events/student_dashboard.html",
+    {
+        "participants": participants
+    }
+)
+
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -171,10 +191,26 @@ from .utils import send_registration_email
 @login_required
 def register_event(request):
 
+    # Get event from URL (if user clicked Register on an event card)
+    event_id = request.GET.get("event")
+
+    selected_event = None
+
+    if event_id:
+        selected_event = get_object_or_404(
+            Event,
+            pk=event_id
+        )
+
     form = ParticipantRegistrationForm(
         request.POST or None,
-        request.FILES or None
+        request.FILES or None,
+        initial={"event": selected_event} if selected_event else None
     )
+
+    # If an event is already selected, remove the dropdown
+    if selected_event:
+        form.fields.pop("event")
 
     if request.method == "POST":
 
@@ -182,9 +218,24 @@ def register_event(request):
 
             participant = form.save(commit=False)
 
-            # Attach logged-in student
+            # Logged-in student
             participant.student = request.user.studentprofile
 
+            # If user came from an event card, fix the event
+            if selected_event:
+                participant.event = selected_event
+            if Participant.objects.filter(
+                student=request.user.studentprofile,
+                event=participant.event
+            ).exists():
+
+                messages.error(
+                    request,
+                    "You have already registered for this event."
+            )
+
+                return redirect("student_dashboard")
+            participant.student = request.user.studentprofile
             participant.save()
 
             send_registration_email(participant)
@@ -200,10 +251,10 @@ def register_event(request):
         request,
         "events/register_event.html",
         {
-            "form": form
+            "form": form,
+            "selected_event": selected_event,
         }
     )
-
 # ─────────────────────────────────────────────────────────────────────────────
 # ADMIN DASHBOARD
 # ─────────────────────────────────────────────────────────────────────────────
@@ -301,7 +352,7 @@ def toggle_attendance(request, participant_id):
     try:
         participant = get_object_or_404(
     Participant,
-    student=request.user.studentprofile
+    pk=participant_id
 )
         participant.attendance = not participant.attendance
         participant.save(update_fields=['attendance'])
@@ -329,7 +380,7 @@ def download_certificate(request, participant_id):
   
     participant = get_object_or_404(
     Participant,
-    student=request.user.studentprofile
+    pk=participant_id
 )
 
     if not participant.can_get_certificate:
@@ -364,7 +415,7 @@ def download_certificate(request, participant_id):
        response = HttpResponse(f.read(), content_type='application/pdf')
 
     response['Content-Disposition'] = (
-        f'attachment; filename="certificate_{participant.student_id}.pdf"'
+    f'attachment; filename="certificate_{participant.student.student_id}.pdf"'
 )
 
     return response

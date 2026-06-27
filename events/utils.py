@@ -1,3 +1,5 @@
+from turtle import title, width
+
 from reportlab.lib.pagesizes import landscape, A4
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
@@ -93,7 +95,30 @@ def generate_certificate(participant):
 
     c.setFillColor(colors.white)
     c.setFont("Helvetica-Bold", 22)
-    c.drawCentredString(width / 2, height - 80, "CERTIFICATE OF PARTICIPATION")
+    if participant.certificate_type == "FIRST":
+         c.setFont("Helvetica-Bold", 26)
+         c.drawCentredString(width / 2, 655, "🥇")
+
+         c.setFont("Helvetica-Bold", 22)
+
+         title = "CERTIFICATE OF ACHIEVEMENT"
+
+    elif participant.certificate_type == "SECOND":
+        c.setFont("Helvetica-Bold", 26)
+        c.drawCentredString(width / 2, 655, "🥈")
+        c.setFont("Helvetica-Bold", 22)
+        title = "CERTIFICATE OF ACHIEVEMENT"
+
+    elif participant.certificate_type == "THIRD":
+        c.setFont("Helvetica-Bold", 26)
+        c.drawCentredString(width / 2, 655, "🥉")
+        c.setFont("Helvetica-Bold", 22)
+        title = "CERTIFICATE OF ACHIEVEMENT"
+
+    else:
+        title = "CERTIFICATE OF PARTICIPATION"
+
+    c.drawCentredString(width/2, 620, title)
 
     # ===== CONTENT (SAFE ZONE) =====
     top = height - 150
@@ -118,11 +143,45 @@ def generate_certificate(participant):
     y -= 40
 
     # Text
-    draw_center("has successfully participated in", 14)
+    if participant.certificate_type == "FIRST":
+
+        draw_center(
+            "has secured FIRST PLACE in",
+            14
+        )
+
+    elif participant.certificate_type == "SECOND":
+
+        draw_center(
+            "has secured SECOND PLACE in",
+            14
+        )
+
+    elif participant.certificate_type == "THIRD":
+
+        draw_center(
+            "has secured THIRD PLACE in",
+            14
+        )
+
+    else:
+
+        draw_center(
+            "has successfully participated in",
+            14
+    )
+
+    
+
     y -= 40
 
-    # Event
-    draw_center(participant.event.name, 18, True, colors.darkblue)
+    draw_center(
+        participant.event.name,
+        18,
+        True,
+        colors.darkblue
+    )
+
     y -= 35
 
     # Date
@@ -135,29 +194,76 @@ def generate_certificate(participant):
     y -= 40
 
     # Achievement
+    if participant.certificate_type == "FIRST":
+        achievement = (
+            "Awarded for securing First Place."
+        )
+    elif participant.certificate_type == "SECOND":
+
+         achievement = (
+            "Awarded for securing Second Place."
+        )
+
+    elif participant.certificate_type == "THIRD":
+
+        achievement = (
+        "Awarded for securing Third Place."
+        )
+    else:
+        achievement = (
+            "Successfully completed all requirements including attendance and feedback submission."
+        )
+
     draw_center(
-        "Successfully completed all requirements including attendance and feedback submission",
+        achievement,
         11
     )
+    y -= 35
+
+    details_y = y
 
     # ===== DETAILS (FIXED POSITION, NOT COLLIDING) =====
-    details_y = 200
 
     c.setFont("Helvetica", 11)
     c.setFillColor(colors.black)
 
     c.drawString(120, details_y, f"Student ID: {participant.student.student_id}")
     c.drawString(120, details_y - 25, "Mode: Offline")
-    c.drawString(120, details_y - 50, "Status: Verified")
 
     # ===== SIGNATURE (CLEAR SPACE) =====
+    import os
+    from django.conf import settings
+
     sign_y = 95
 
-    c.line(120, sign_y, 300, sign_y)
-    line_center_x = (120 + 320) / 2 + 15
+# ---------- Signature Image ----------
+    signature_path = os.path.join(
+        settings.BASE_DIR,
+        "static",
+        "images",
+        "signature.png"
+    )
 
+    if os.path.exists(signature_path):
+        c.drawImage(
+            signature_path,
+            145,            # X position
+            sign_y + 10,    # Y position (above the line)
+            width=130,
+            height=45,
+            mask='auto'
+        )
+
+# ---------- Signature Line ----------
+    c.line(120, sign_y, 300, sign_y)
+
+# ---------- Authorised Signatory ----------
     c.setFont("Helvetica-Bold", 11)
-    c.drawString(120, sign_y - 20, "Authorised Signatory")
+    c.drawString(
+        120,
+        sign_y - 20,
+        "Authorised Signatory"
+    )
 
     # ===== QR CODE =====
     verify_url = f"http://127.0.0.1:8001/verify/{participant.certificate_id}/"

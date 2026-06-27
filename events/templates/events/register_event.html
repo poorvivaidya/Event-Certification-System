@@ -28,17 +28,39 @@
 
 
       <!-- Event -->
-      <div class="mb-3">
-        <label for="{{ form.event.id_for_label }}" class="form-label fw-semibold">
-          Event <span class="text-danger">*</span>
-        </label>
-        {{ form.event }}
-        {% if form.event.errors %}
-        <div class="invalid-feedback d-block">
-          {% for error in form.event.errors %}{{ error }}{% endfor %}
-        </div>
-        {% endif %}
-      </div>
+{% if selected_event %}
+
+<div class="mb-4">
+    <label class="form-label fw-semibold">
+        Selected Event
+    </label>
+
+    <input
+        type="text"
+        class="form-control"
+        value="{{ selected_event.name }}"
+        readonly>
+</div>
+
+{% else %}
+
+<div class="mb-4">
+    <label for="{{ form.event.id_for_label }}" class="form-label fw-semibold">
+        Event <span class="text-danger">*</span>
+    </label>
+
+    {{ form.event }}
+
+    {% if form.event.errors %}
+    <div class="invalid-feedback d-block">
+        {% for error in form.event.errors %}
+            {{ error }}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+{% endif %}
 
       <!-- Transaction ID -->
       <div class="mb-3">

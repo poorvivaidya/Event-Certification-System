@@ -238,3 +238,38 @@ class BulkUploadForm(forms.Form):
             }
         )
     )
+from django import forms
+from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
+
+
+class CustomPasswordResetForm(PasswordResetForm):
+
+    email = forms.EmailField(
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-control form-control-lg",
+                "placeholder": "Enter your registered email"
+            }
+        )
+    )
+
+
+class CustomSetPasswordForm(SetPasswordForm):
+
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control form-control-lg",
+                "placeholder": "New Password"
+            }
+        )
+    )
+
+    new_password2 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control form-control-lg",
+                "placeholder": "Confirm Password"
+            }
+        )
+    )

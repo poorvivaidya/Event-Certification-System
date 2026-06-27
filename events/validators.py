@@ -1,5 +1,28 @@
 import os
 from django.core.exceptions import ValidationError
+import re
+from django.core.exceptions import ValidationError
+
+
+def validate_student_id(student_id):
+    """
+    Format:
+    1 digit
+    2 letters
+    2 digits
+    2 letters
+    2 digits
+
+    Example:
+    1AB23CD45
+    """
+
+    pattern = r'^[0-9][A-Za-z]{2}[0-9]{2}[A-Za-z]{2}[0-9]{2}$'
+
+    if not re.match(pattern, student_id):
+        raise ValidationError(
+            "Student ID must follow the format: 1AB23CD45"
+        )
 
 
 ALLOWED_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg']

@@ -25,26 +25,25 @@ class StudentProfileAdmin(admin.ModelAdmin):
 class ParticipantAdmin(admin.ModelAdmin):
 
     list_display = [
-        'student',
-        'event',
-        'transaction_verified',
-        'attendance',
-        'feedback_submitted',
-        'certificate_generated',
-        'registered_at'
+        "student",
+        "event",
+        "transaction_verified",
+        "attendance",
+        "certificate_type",
     ]
 
     list_filter = [
-        'event',
-        'attendance',
-        'transaction_verified',
-        'feedback_submitted'
+        "event",
+        "transaction_verified",
+        "attendance",
+        "certificate_type",
     ]
 
     search_fields = [
-        'student__student_id',
-        'student__user__username',
-        'student__user__email'
+        "student__student_id",
+        "student__user__first_name",
+        "student__user__last_name",
+        "event__name",
     ]
 
     readonly_fields = [
@@ -53,6 +52,7 @@ class ParticipantAdmin(admin.ModelAdmin):
     ]
 
     list_editable = [
+        'certificate_type',
         'transaction_verified',
         'attendance'
     ]

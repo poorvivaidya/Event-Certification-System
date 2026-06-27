@@ -35,48 +35,4 @@ urlpatterns = [
         views.download_certificate,
         name="download_certificate"
     ),
-
-    # Admin
-    path(
-        "dashboard/",
-        views.admin_dashboard,
-        name="admin_dashboard"
-    ),
-
-    path(
-        "toggle-attendance/<int:participant_id>/",
-        views.toggle_attendance,
-        name="toggle_attendance"
-    ),
-
-    path(
-        "toggle-transaction/<int:pk>/",
-        views.toggle_transaction,
-        name="toggle_transaction"
-    ),
-
-    path(
-        "bulk-upload/",
-        views.bulk_upload,
-        name="bulk_upload"
-    ),
-
-    path(
-        "participant/<int:participant_id>/",
-        views.participant_detail,
-        name="participant_detail"
-    ),
-
-    path(
-        "verify/<uuid:certificate_id>/",
-        views.verify_certificate,
-        name="verify_certificate"
-    ),
-
-    path(
-        "api/stats/",
-        views.api_stats,
-        name="api_stats"
-    ),
-
 ]
