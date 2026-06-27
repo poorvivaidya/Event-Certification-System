@@ -1,79 +1,275 @@
-# Django-semihack-starter
-Starter template for semi-hackathon
-# 🚀 Django Semi-Hackathon: [Team Name]
+# 🎓 Event Lifecycle & Certification System
 
-## 📋 Project Details
-- **Theme**: [e.g., TH-03: Elective Choice System]
-- **Team Members**: @student1, @student2, @student3, @student4
-- **Live URL**: [To be filled after deployment]
+A full-stack Django-based Event Lifecycle & Certification System that streamlines the complete event management process—from student registration to certificate generation and verification.
 
-## ✅ Submission Checklist
-- [ ] Code runs with `pip install -r requirements.txt`
-- [ ] `DEBUG=False` in production settings
-- [ ] Working AJAX endpoint (tested live)
-- [ ] CSV/PDF export functional
-- [ ] CO-SDG mapping table completed below
-- [ ] 150-word SDG justification included
+The system enables secure participant registration, transaction verification, attendance management, feedback collection, automated PDF certificate generation, QR-based certificate verification, and role-based access for students and administrators.
 
-## 🎯 CO-SDG Mapping Table
-| Course Outcome | How This Project Demonstrates It | SDG Target Addressed |
-|---------------|----------------------------------|---------------------|
-| CO1: MVT Architecture | [Brief explanation] | SDG 4.5 |
-| CO2: Models & Forms | [Brief explanation] | SDG 9.5 |
-| ... | ... | ... |
+---
 
-## 📦 Setup Instructions
+## 🚀 Features
+
+### 👨‍🎓 Student Module
+
+- Student Sign Up & Login
+- Secure authentication
+- Forgot Password (Email Reset)
+- Register for multiple events
+- Event selection from Upcoming Events
+- Dashboard displaying all registered events
+- Upload payment receipt
+- Unique transaction ID validation
+- Student ID format validation
+- Feedback submission
+- Certificate download
+- QR-code verified certificates
+- Remember Me login option
+
+---
+
+### 👨‍💼 Admin Module
+
+- Secure Django Administration
+- Create and manage events
+- Verify payment transactions
+- Mark attendance
+- View all participants
+- Manage multiple event registrations
+- Bulk participant upload via CSV
+- Assign certificate types:
+  - Participation
+  - First Place 🥇
+  - Second Place 🥈
+  - Third Place 🥉
+- Automatic certificate generation
+- View participant details
+
+---
+
+## 🏆 Certificate Features
+
+- Professional PDF certificate
+- QR Code Verification
+- Unique Certificate ID
+- Student ID
+- Event Details
+- Date of Event
+- Digital Signature
+- Authorised Signatory
+- Winner Certificates
+- Participation Certificates
+- Certificate Verification Page
+
+---
+
+## 🔐 Authentication
+
+- Student Registration
+- Student Login
+- Logout
+- Forgot Password
+- Password Reset via Email
+- Django Admin Authentication
+
+---
+
+## 📧 Email Features
+
+- Registration Confirmation Email
+- Password Reset Email
+- Secure SMTP Integration
+
+---
+
+## 📱 Responsive UI
+
+- Bootstrap 5
+- Mobile Friendly
+- Responsive Dashboard
+- Modern Login Screens
+- Professional Certificate Design
+
+---
+
+## 🛠️ Technology Stack
+
+### Backend
+
+- Django 5
+- Python 3
+
+### Frontend
+
+- HTML5
+- CSS3
+- Bootstrap 5
+- JavaScript
+
+### Database
+
+- SQLite (Development)
+- PostgreSQL (Production - Render)
+
+### Libraries
+
+- ReportLab
+- QRCode
+- Pillow
+- WhiteNoise
+- Gunicorn
+
+---
+
+## 📂 Project Structure
+
+```
+event_cert/
+│
+├── event_cert/
+│
+├── events/
+│   ├── models.py
+│   ├── views.py
+│   ├── forms.py
+│   ├── admin.py
+│   ├── utils.py
+│   ├── validators.py
+│
+├── media/
+│
+├── static/
+│   ├── css/
+│   ├── js/
+│   ├── images/
+│
+├── templates/
+│
+├── requirements.txt
+│
+├── manage.py
+```
+
+---
+
+## ⚙️ Installation
+
+Clone the repository
+
 ```bash
-git clone [your-repo-url]
-cd [repo-name]
+git clone https://github.com/poorvivaidya/Event-Certification-System.git
+```
+
+Move into the project
+
+```bash
+cd YOUR_REPOSITORY
+```
+
+Create virtual environment
+
+```bash
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+```
+
+Activate virtual environment
+
+Windows
+
+```bash
+venv\Scripts\activate
+```
+
+Linux / Mac
+
+```bash
+source venv/bin/activate
+```
+
+Install dependencies
+
+```bash
 pip install -r requirements.txt
+```
+
+Run migrations
+
+```bash
+python manage.py makemigrations
 python manage.py migrate
+```
+
+Run the server
+
+```bash
 python manage.py runserver
 ```
-### ✅ Pre-Deploy Checklist
-- [ ] `DEBUG = False` in `settings.py`
-- [ ] `STATIC_ROOT` configured
-- [ ] `ALLOWED_HOSTS` includes cloud domain
-- [ ] `gunicorn` in `requirements.txt`
-- [ ] Local `python manage.py collectstatic` ran successfully
-## 🚀 Deployment Guide (Free Tier: Render)
-*Follow these steps on Event Day to make your app publicly accessible for judging.*
 
-1. **Sign Up & Connect**
-   - Go to [render.com](https://render.com) → Sign up with GitHub
-   - Authorize Render to access your repos
+---
 
-2. **Create Web Service**
-   - Click `New +` → `Web Service` → Connect this repo
-   - Fill in:
-     - **Name**: `team-xyz-app`
-     - **Region**: `Oregon` or `Frankfurt` (closest to India)
-     - **Branch**: `main`
-     - **Build Command**: `pip install -r requirements.txt && python manage.py collectstatic --noinput`
-     - **Start Command**: `gunicorn project_name.wsgi` *(replace `project_name` with your actual Django folder)*
+## 🔑 Environment Variables
 
-3. **Environment Variables (Critical)**
-   Click `Advanced` → `Add Environment Variable`:
-   | Key | Value |
-   |-----|-------|
-   | `SECRET_KEY` | Generate at [miniwebtool.com/django-secret-key-generator](https://miniwebtool.com/django-secret-key-generator/) |
-   | `DEBUG` | `False` |
-   | `ALLOWED_HOSTS` | `*.onrender.com, localhost, 127.0.0.1` |
+Create a `.env` file
 
-4. **Deploy & Verify**
-   - Click `Create Web Service` → Wait 2–4 mins for build
-   - Once live, copy the `https://...onrender.com` URL
-   - ✅ Test: Open URL, check CSS/JS loads, test AJAX endpoint, download CSV/PDF
-   - 📝 Update this `README.md` with your live URL
+```
+SECRET_KEY=your_secret_key
 
-### 🚨 Troubleshooting Quick Fixes
-| Issue | Fix |
-|-------|-----|
-| `Application Error` | Ensure `gunicorn` is in `requirements.txt` & `wsgi` path matches your project folder |
-| Broken CSS/JS | Add `STATIC_ROOT = BASE_DIR / "staticfiles"` to `settings.py` |
-| `DisallowedHost` | Verify `ALLOWED_HOSTS` env var or `settings.py` matches your Render domain |
-| DB locked/migrations fail | Free tier uses SQLite by default. It's fine for hackathon demos. No extra config needed. |
+DEBUG=False
 
-> 💡 **Note:** After deployment, every `git push` to `main` auto-triggers a rebuild. No manual server restarts needed.
+EMAIL_HOST_USER=eventcertsystem@gmail.com
+
+EMAIL_HOST_PASSWORD=fwyl mktj ltzd horu
+```
+
+---
+
+## 📷 Key Modules
+
+- Student Registration
+- Event Registration
+- Transaction Verification
+- Attendance Tracking
+- Feedback Management
+- Certificate Generation
+- QR Verification
+- Password Reset
+- Django Administration
+
+---
+
+## 🔍 Certificate Verification
+
+Every certificate contains
+
+- QR Code
+- Certificate ID
+- Verification URL
+
+The QR code redirects to the verification page where the certificate authenticity can be verified.
+
+---
+
+## 📌 Future Enhancements
+
+- Email certificate after event completion
+- Event analytics dashboard
+- Multiple admin roles
+- Online payment gateway integration
+- Event reminders
+- Certificate templates
+- Cloud storage for certificates
+- Attendance via QR scanning
+
+---
+
+## 👩‍💻 Developed By
+
+**Poorvi Vaidya**
+
+Computer Science & Engineering
+
+SJB Institute of Technology
+
+---
+
+## 📄 License
+
+This project is developed for academic and learning purposes.
