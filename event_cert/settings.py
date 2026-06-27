@@ -23,6 +23,7 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "https://event-certification-system.onrender.com",
+    "https://event-certification-system-1.onrender.com",
 ]
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
