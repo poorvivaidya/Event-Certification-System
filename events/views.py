@@ -14,10 +14,15 @@ from events.validators import validate_student_id
 from .forms import ParticipantRegistrationForm
 from .models import Event, Participant, Feedback
 from .forms import ParticipantRegistrationForm, FeedbackForm, BulkUploadForm
+from .utils import (
+    send_registration_email,
+    send_certificate_ready_email,
+)
 
 from .utils import (
     generate_certificate,
     send_registration_email,
+    send_certificate_ready_email,
     process_bulk_csv,
 )
 
@@ -143,28 +148,58 @@ def index(request):
         'total_participants': total_participants,
     })
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Participant
+
+
 @login_required
 def student_dashboard(request):
 
-    participant = Participant.objects.filter(
-        student__user=request.user
-    ).first()
-    participants = Participant.objects.filter(
-    student=request.user.studentprofile
-).select_related("event")
+    participants = (
+        Participant.objects
+        .filter(student=request.user.studentprofile)
+        .select_related("event")
+        .order_by("-registered_at")
+    )
+
+    total_events = participants.count()
+
+    verified_events = participants.filter(
+        transaction_verified=True
+    ).count()
+
+    certificates_available = participants.filter(
+        attendance=True,
+        transaction_verified=True,
+        feedback_submitted=True
+    ).count()
+
+    pending_feedback = participants.filter(
+        attendance=True,
+        transaction_verified=True,
+        feedback_submitted=False
+    ).count()
 
     context = {
-        "participant": participant,
-        "participants": participants
+
+        "participants": participants,
+
+        "total_events": total_events,
+
+        "verified_events": verified_events,
+
+        "certificates_available": certificates_available,
+
+        "pending_feedback": pending_feedback,
+
     }
 
     return render(
-    request,
-    "events/student_dashboard.html",
-    {
-        "participants": participants
-    }
-)
+        request,
+        "events/student_dashboard.html",
+        context
+    )
 
 
 from django.http import JsonResponse
@@ -407,6 +442,13 @@ def download_certificate(request, participant_id):
     import os
 
     file_path = generate_certificate(participant)
+
+    if not participant.certificate_generated:
+
+        participant.certificate_generated = True
+        participant.save()
+
+        send_certificate_ready_email(participant)
 
     if not os.path.exists(file_path):
         raise Http404("Certificate not found")

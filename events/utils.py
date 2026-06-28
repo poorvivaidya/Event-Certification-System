@@ -8,22 +8,41 @@ from django.conf import settings
 
 from django.core.mail import send_mail
 
+from django.core.mail import send_mail
+from django.conf import settings
+
+
 def send_registration_email(participant):
+
     subject = "Event Registration Successful"
 
     message = f"""
 Hello {participant.student.user.get_full_name()},
 
-You have successfully registered for:
+Your registration has been successfully submitted.
 
-Event: {participant.event.name}
-Date: {participant.event.date}
+Event:
+{participant.event.name}
 
-Your Certificate ID: {participant.certificate_id}
+Date:
+{participant.event.date.strftime("%d-%m-%Y")}
 
-Thank you for participating!
+Status:
+✓ Registration Successful
+⏳ Awaiting Admin Verification
 
-- EventCert Team
+Your certificate will become available only after:
+
+• Transaction Verification
+• Attendance Confirmation
+• Feedback Submission
+
+Once eligible, you will receive another email with your Certificate ID and instructions to download your certificate.
+
+Thank you for registering.
+
+Regards,
+EventCert Team
 """
 
     send_mail(
@@ -31,7 +50,47 @@ Thank you for participating!
         message,
         settings.DEFAULT_FROM_EMAIL,
         [participant.student.user.email],
-        fail_silently=True
+        fail_silently=False,
+    )
+
+def send_certificate_ready_email(participant):
+
+    subject = "Your Certificate is Ready"
+
+    verify_link = (
+        f"http://127.0.0.1:8001/verify/{participant.certificate_id}/"
+    )
+
+    message = f"""
+Hello {participant.student.user.get_full_name()},
+
+Congratulations!
+
+Your certificate for the following event is now available.
+
+Event:
+{participant.event.name}
+
+Certificate ID:
+{participant.certificate_id}
+
+You may now log in to your dashboard and download your certificate.
+
+Certificate Verification:
+{verify_link}
+
+Thank you for participating.
+
+Regards,
+EventCert Team
+"""
+
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [participant.student.user.email],
+        fail_silently=False,
     )
 
 import csv
