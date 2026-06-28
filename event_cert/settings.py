@@ -91,6 +91,11 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+SITE_URL = os.environ.get(
+    "SITE_URL",
+    "http://127.0.0.1:8001"
+)
+
 STATIC_URL = "/static/"
 
 STATICFILES_DIRS = [

@@ -323,7 +323,12 @@ def generate_certificate(participant):
     )
 
     # ===== QR CODE =====
-    verify_url = f"http://127.0.0.1:8001/verify/{participant.certificate_id}/"
+    from django.conf import settings
+
+    verify_url = (
+        f"{settings.SITE_URL}"
+        f"/verify/{participant.certificate_id}/"
+    )
 
     qr = qrcode.make(verify_url)
     qr_path = os.path.join(settings.MEDIA_ROOT, f"qr_{participant.certificate_id}.png")
