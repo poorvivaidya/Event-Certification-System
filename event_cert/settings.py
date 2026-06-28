@@ -22,11 +22,12 @@ ALLOWED_HOSTS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://event-certification-system.onrender.com",
     "https://event-certification-system-1.onrender.com",
 ]
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 INSTALLED_APPS = [
