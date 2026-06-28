@@ -471,21 +471,24 @@ def download_certificate(request, participant_id):
 # ─────────────────────────────────────────────────────────────────────────────
 # CERTIFICATE VERIFICATION PAGE
 # ─────────────────────────────────────────────────────────────────────────────
+from django.shortcuts import render, get_object_or_404
+from .models import Participant
 @login_required
 def verify_certificate(request, certificate_id):
-    """Public verification page for a certificate."""
-    try:
-        participant = get_object_or_404(Participant, certificate_id=certificate_id)
-        verified = participant.can_get_certificate
-    except Exception:
-        participant = None
-        verified = False
 
-    return render(request, 'events/verify.html', {
-        'participant': participant,
-        'verified': verified,
-        'certificate_id': certificate_id,
-    })
+    participant = get_object_or_404(
+        Participant,
+        certificate_id=certificate_id,
+        certificate_generated=True
+    )
+
+    return render(
+        request,
+        "events/verify.html",
+        {
+            "participant": participant
+        }
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -35,4 +35,9 @@ urlpatterns = [
         views.download_certificate,
         name="download_certificate"
     ),
+    path(
+        "verify/<uuid:certificate_id>/",
+        views.verify_certificate,
+        name="verify_certificate"
+    ),
 ]

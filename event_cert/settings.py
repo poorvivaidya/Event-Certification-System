@@ -94,6 +94,8 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+SITE_URL = "https://event-certification-system-1.onrender.com"
+
 SITE_URL = os.environ.get(
     "SITE_URL",
     "http://127.0.0.1:8001"
