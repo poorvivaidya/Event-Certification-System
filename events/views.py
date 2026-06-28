@@ -29,6 +29,11 @@ from .utils import (
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from .models import StudentProfile
+from django.http import HttpResponse
+from django.middleware.csrf import get_token
+
+def csrf_test(request):
+    return HttpResponse(get_token(request))
 
 def signup(request):
 
